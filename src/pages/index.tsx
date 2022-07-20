@@ -7,6 +7,7 @@ import vtkFullScreenRenderWindow from '@kitware/vtk.js/Rendering/Misc/FullScreen
 import vtkActor           from '@kitware/vtk.js/Rendering/Core/Actor';
 import vtkMapper          from '@kitware/vtk.js/Rendering/Core/Mapper';
 import vtkConeSource      from '@kitware/vtk.js/Filters/Sources/ConeSource';
+
 export default function HomePage() {
   const vtkContainerRef = useRef(null);
   const context = useRef(null);
