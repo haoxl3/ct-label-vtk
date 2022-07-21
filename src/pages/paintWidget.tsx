@@ -25,13 +25,13 @@ import {
 } from '@kitware/vtk.js/Widgets/Widgets3D/ShapeWidget/Constants';
 import { ViewTypes } from '@kitware/vtk.js/Widgets/Core/WidgetManager/Constants';
 import { vec3 } from 'gl-matrix';
-import {Select, Slider, Button, Row, Col} from 'antd';
+import {Select, Slider, Button} from 'antd';
 const {Option} = Select;
 import 'antd/dist/antd.less';
 
 export default function PaintWidget() {
-    const scene = {};
-    const widgets = {};
+    const scene = useRef({});
+    const widgets = useRef({});
     const image = {};
     let activeWidget = 'paintWidget';
     // Paint filter
@@ -139,9 +139,7 @@ export default function PaintWidget() {
         initializeHandle(scene.paintHandle);
 
         scene.rectangleHandle.onEndInteractionEvent(() => {
-            const rectangleHandle = scene.rectangleHandle
-            .getWidgetState()
-            .getRectangleHandle();
+            const rectangleHandle = scene.rectangleHandle.getWidgetState().getRectangleHandle();
         
             const origin = rectangleHandle.getOrigin();
             const corner = rectangleHandle.getCorner();
@@ -219,6 +217,8 @@ export default function PaintWidget() {
             scene.polygonHandle.updateRepresentationForRender();
         });
         initializeHandle(scene.polygonHandle);
+
+        loadImage();
     };
     const loadImage = () => {
         image.imageMapper = vtkImageMapper.newInstance();
@@ -320,6 +320,7 @@ export default function PaintWidget() {
             image.imageMapper.onModified(update);
             // trigger initial update
             update();
+            readyAll();
         });
     };
     const readyHandle = (scope, picking = false) => {
@@ -336,13 +337,11 @@ export default function PaintWidget() {
     };
     // UI logic
     const radiuHandle = (value: number) => {
-        debugger
         widgets.paintWidget.setRadius(value);
         painter.setRadius(value);
         setRadius(value);
     };
     const sliceHandle = (value: number) => {
-        debugger
         image.imageMapper.setSlice(value);
         setSlice(value);
     };
@@ -360,7 +359,6 @@ export default function PaintWidget() {
         setAxis(value);
     };
     const widgetHandle = (value: string) => {
-        debugger
         activeWidget = value;
         scene.widgetManager.grabFocus(widgets[activeWidget]);
 
@@ -388,8 +386,8 @@ export default function PaintWidget() {
     };
     useEffect(() => {
         renderScene();
-        loadImage();
-        readyAll();
+        // loadImage();
+        // readyAll();
         window.addEventListener('resize', readyAll);
     }, []);
     return (
