@@ -32,6 +32,7 @@ import '@kitware/vtk.js/IO/Core/DataAccessHelper/HttpDataAccessHelper';
 import {Checkbox, Select, Slider, Button} from 'antd';
 import type { CheckboxChangeEvent } from 'antd/es/checkbox';
 const { Option } = Select;
+import 'antd/dist/antd.less';
 
 export default function ResliceCursorWidget() {
     // Define main attributes
@@ -56,6 +57,13 @@ export default function ResliceCursorWidget() {
     const controlContainer = useRef(null);
     const reader = vtkHttpDataSetReader.newInstance({ fetchGzip: true });
     const [slabNumberMax, setSlabNumberMax] = useState(385.69547573182655);
+    const [checkboxOrthogality, setCheckboxOrthogality] = useState(true);
+    const [checkboxRotation, setCheckboxRotation] = useState(true);
+    const [checkboxTranslation, setCheckboxTranslation] = useState(true);
+    const [checkboxScaleInPixels, setCheckboxScaleInPixels] = useState(true);
+    const [slabMode, setSlabMode] = useState('2');
+    const [slabNumber, setSlabNumber] = useState(1);
+    const [selectInterpolation, setSelectInterpolation] = useState(0);
 
     const createRGBStringFromRGBValues = (rgb) => {
         if (rgb.length !== 3) {
@@ -335,14 +343,17 @@ export default function ResliceCursorWidget() {
     const checkboxOrthogalityHandle = (e: CheckboxChangeEvent) => {
         console.log(e.target.checked);
         widgetState.setKeepOrthogonality(e.target.checked);
+        setCheckboxOrthogality(e.target.checked);
     };
     const checkboxRotationHandle = (e: CheckboxChangeEvent) => {
         console.log(e.target.checked);
         widgetState.setEnableRotation(e.target.checked);
+        setCheckboxRotation(e.target.value);
     };
     const checkboxTranslationHandle = (e: CheckboxChangeEvent) => {
         console.log(e.target.checked);
         widgetState.setEnableTranslation(e.target.checked);
+        setCheckboxTranslation(e.target.value);
     };
     const checkboxScaleInPixelsHandle = (e: CheckboxChangeEvent) => {
         console.log(e.target.checked);
@@ -350,19 +361,22 @@ export default function ResliceCursorWidget() {
             obj.widgetInstance.setScaleInPixels(e.target.checked);
             obj.interactor.render();
         });
+        setCheckboxScaleInPixels(e.target.value);
     };
     const slabModeHandle = (value: string) => {
         console.log(value);
         viewAttributes.forEach((obj) => {
             obj.reslice.setSlabMode(Number(value));
         });
+        setSlabMode(value);
         updateViews();
     };
-    const slabNumberHandle = (value: number | [number, number]) => {
+    const slabNumberHandle = (value: number) => {
         console.log(value);
         viewAttributes.forEach((obj) => {
             obj.reslice.setSlabNumberOfSlices(value);
         });
+        setSlabNumber(value);
         updateViews();
     };
     const selectInterpolationHandle = (value: string) => {
@@ -370,6 +384,7 @@ export default function ResliceCursorWidget() {
         viewAttributes.forEach((obj) => {
             obj.reslice.setInterpolationMode(Number(value));
         });
+        setSelectInterpolation(Number(value));
         updateViews();
     };
     const buttonResetHandle = () => {
@@ -384,23 +399,23 @@ export default function ResliceCursorWidget() {
     return (
         <div id="container">
             <div ref={controlContainer}>
-                <Checkbox onChange={checkboxOrthogalityHandle}>Keep orthogonality</Checkbox>
-                <Checkbox onChange={checkboxRotationHandle}>Allow rotation</Checkbox>
-                <Checkbox onChange={checkboxTranslationHandle}>Allow translation</Checkbox>
-                <Checkbox onChange={checkboxScaleInPixelsHandle}>Scale in pixels</Checkbox>
-                <Select defaultValue="2" onChange={slabModeHandle}>
+                <Checkbox checked={checkboxOrthogality} onChange={checkboxOrthogalityHandle}>Keep orthogonality</Checkbox>
+                <Checkbox checked={checkboxRotation} onChange={checkboxRotationHandle}>Allow rotation</Checkbox>
+                <Checkbox checked={checkboxTranslation} onChange={checkboxTranslationHandle}>Allow translation</Checkbox>
+                <Checkbox checked={checkboxScaleInPixels} onChange={checkboxScaleInPixelsHandle}>Scale in pixels</Checkbox>
+                <Select value={slabMode} onChange={slabModeHandle}>
                     <Option value="0">MIN</Option>
                     <Option value="1">MAX</Option>
                     <Option value="2">MEAN</Option>
                     <Option value="3">SUM</Option>
                 </Select>
                 <span>Slab Number of Slices :</span>
-                <Slider range defaultValue={1} step={1} min={1} max={slabNumberMax} onChange={slabNumberHandle}/>
-                <Select defaultValue="nearest" onChange={selectInterpolationHandle}>
-                    <Option value="0">Nearest</Option>
-                    <Option value="1">Linear</Option>
+                <Slider range value={slabNumber} step={1} min={1} max={slabNumberMax} onChange={slabNumberHandle} style={{width: '100px', display: 'inline-block'}}/>
+                <Select value={selectInterpolation} onChange={selectInterpolationHandle}>
+                    <Option value={0}>Nearest</Option>
+                    <Option value={1}>Linear</Option>
                 </Select>
-                <Button onClick={buttonResetHandle}>Reset views</Button>
+                <Button onClick={buttonResetHandle} type="primary">Reset views</Button>
             </div>
         </div>
     );
