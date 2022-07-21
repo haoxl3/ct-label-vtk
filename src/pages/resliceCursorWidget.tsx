@@ -1,4 +1,4 @@
-import {useEffect, useRef} from 'react';
+import {useEffect, useRef, useState} from 'react';
 import '@kitware/vtk.js/favicon';
 // Load the rendering pieces we want to use (for both WebGL and WebGPU)
 import '@kitware/vtk.js/Rendering/Profiles/All';
@@ -27,10 +27,11 @@ import { vec3 } from 'gl-matrix';
 import { SlabMode } from '@kitware/vtk.js/Imaging/Core/ImageReslice/Constants';
 
 import { xyzToViewType } from '@kitware/vtk.js/Widgets/Widgets3D/ResliceCursorWidget/Constants';
-import controlPanel from './controlPanel.html';
-
 // Force the loading of HttpDataAccessHelper to support gzip decompression
 import '@kitware/vtk.js/IO/Core/DataAccessHelper/HttpDataAccessHelper';
+import {Checkbox, Select, Slider, Button} from 'antd';
+import type { CheckboxChangeEvent } from 'antd/es/checkbox';
+const { Option } = Select;
 
 export default function ResliceCursorWidget() {
     // Define main attributes
@@ -52,9 +53,9 @@ export default function ResliceCursorWidget() {
     let view3D = null;
     const showDebugActors = true;
     // Define html structure
-    const container = useRef(null);
     const controlContainer = useRef(null);
     const reader = vtkHttpDataSetReader.newInstance({ fetchGzip: true });
+    const [slabNumberMax, setSlabNumberMax] = useState(385.69547573182655);
 
     const createRGBStringFromRGBValues = (rgb) => {
         if (rgb.length !== 3) {
@@ -98,9 +99,10 @@ export default function ResliceCursorWidget() {
         return obj.modified;
     };
     const renderContainer = () => {
+        const container = document.getElementById('container');
         for (let i = 0; i < 4; i++) {
             const element = document.createElement('div');
-            element.setAttribute('class', 'view');
+            // element.setAttribute('class', 'view');
             element.style.width = '50%';
             element.style.height = '300px';
             element.style.display = 'inline-block';
@@ -307,79 +309,99 @@ export default function ResliceCursorWidget() {
                 // set max number of slices to slider.
                 const maxNumberOfSlices = vec3.length(image.getDimensions());
                 // todo
-                document.getElementById('slabNumber').max = maxNumberOfSlices;
+                // document.getElementById('slabNumber').max = maxNumberOfSlices;
+                setSlabNumberMax(maxNumberOfSlices);
             });
         });
+    };
+    const updateViews = () => {
+        viewAttributes.forEach((obj, i) => {
+            updateReslice({
+              viewType: xyzToViewType[i],
+              reslice: obj.reslice,
+              actor: obj.resliceActor,
+              renderer: obj.renderer,
+              resetFocalPoint: true,
+              keepFocalPointPosition: false,
+              computeFocalPointOffset: true,
+              sphereSources: obj.sphereSources,
+              resetViewUp: true,
+            });
+            obj.renderWindow.render();
+        });
+        view3D.renderer.resetCamera();
+        view3D.renderer.resetCameraClippingRange();
+    };
+    const checkboxOrthogalityHandle = (e: CheckboxChangeEvent) => {
+        console.log(e.target.checked);
+        widgetState.setKeepOrthogonality(e.target.checked);
+    };
+    const checkboxRotationHandle = (e: CheckboxChangeEvent) => {
+        console.log(e.target.checked);
+        widgetState.setEnableRotation(e.target.checked);
+    };
+    const checkboxTranslationHandle = (e: CheckboxChangeEvent) => {
+        console.log(e.target.checked);
+        widgetState.setEnableTranslation(e.target.checked);
+    };
+    const checkboxScaleInPixelsHandle = (e: CheckboxChangeEvent) => {
+        console.log(e.target.checked);
+        viewAttributes.forEach((obj) => {
+            obj.widgetInstance.setScaleInPixels(e.target.checked);
+            obj.interactor.render();
+        });
+    };
+    const slabModeHandle = (value: string) => {
+        console.log(value);
+        viewAttributes.forEach((obj) => {
+            obj.reslice.setSlabMode(Number(value));
+        });
+        updateViews();
+    };
+    const slabNumberHandle = (value: number | [number, number]) => {
+        console.log(value);
+        viewAttributes.forEach((obj) => {
+            obj.reslice.setSlabNumberOfSlices(value);
+        });
+        updateViews();
+    };
+    const selectInterpolationHandle = (value: string) => {
+        console.log(value);
+        viewAttributes.forEach((obj) => {
+            obj.reslice.setInterpolationMode(Number(value));
+        });
+        updateViews();
+    };
+    const buttonResetHandle = () => {
+        widgetState.setPlanes({ ...initialPlanesState });
+        widget.setCenter(widget.getWidgetState().getImage().getCenter());
+        updateViews();
     };
     useEffect(() => {
         renderContainer();
         loadImage();
     }, [])
     return (
-        <div ref={container}>
-            {/* <div>
-                <table> 
-                    <tbody>
-                        <tr> 
-                            <td>Keep orthogonality:</td> 
-                            <td> 
-                                <input type="checkbox" id="checkboxOrthogality" checked="checked"/> 
-                            </td> 
-                        </tr> 
-                        <tr> 
-                            <td>Allow rotation:</td> 
-                            <td> 
-                                <input type="checkbox" id="checkboxRotation" checked="checked"/> 
-                            </td> 
-                        </tr> 
-                        <tr> 
-                            <td>Allow translation:</td> 
-                            <td> 
-                                <input type="checkbox" id="checkboxTranslation" checked="checked"/> 
-                            </td> 
-                        </tr> 
-                        <tr> 
-                            <td>Scale in pixels:</td> 
-                            <td> 
-                                <input type="checkbox" id="checkboxScaleInPixels" checked="checked"/> 
-                            </td> 
-                        </tr> 
-                        <tr> 
-                            <td>Slab Mode :</td> 
-                            <td> 
-                                <select id="slabMode"> 
-                                    <option id="slabModeMin" value="0">MIN</option> 
-                                    <option id="slabModeMax" value="1">MAX</option> 
-                                    <option id="slabModeMean" selected="selected" value="2">MEAN</option> 
-                                    <option id="slabModeSum" value="3">SUM</option> 
-                                </select> 
-                            </td> 
-                        </tr> 
-                        <tr> 
-                            <td>Slab Number of Slices :</td> 
-                            <td>
-                                <input id="slabNumber" type="range" min="1" max="385.69547573182655" step="1" value="1" style="width:100px"/>
-                            </td> 
-                            <td id="slabNumberValue">1</td> 
-                        </tr> 
-                        <tr> 
-                            <td>Interpolation mode :</td> 
-                            <td> 
-                                <select id="selectInterpolation"> 
-                                    <option id="nearest" selected="selected">Nearest</option> 
-                                    <option id="linear">Linear</option> 
-                                </select> 
-                            </td> 
-                        </tr> 
-                        <tr> 
-                            <td> 
-                                <button id="buttonReset">Reset views</button> 
-                            </td> 
-                        </tr> 
-                    </tbody>
-                </table>
-            </div> */}
-            <div ref={controlContainer}></div>
+        <div id="container">
+            <div ref={controlContainer}>
+                <Checkbox onChange={checkboxOrthogalityHandle}>Keep orthogonality</Checkbox>
+                <Checkbox onChange={checkboxRotationHandle}>Allow rotation</Checkbox>
+                <Checkbox onChange={checkboxTranslationHandle}>Allow translation</Checkbox>
+                <Checkbox onChange={checkboxScaleInPixelsHandle}>Scale in pixels</Checkbox>
+                <Select defaultValue="2" onChange={slabModeHandle}>
+                    <Option value="0">MIN</Option>
+                    <Option value="1">MAX</Option>
+                    <Option value="2">MEAN</Option>
+                    <Option value="3">SUM</Option>
+                </Select>
+                <span>Slab Number of Slices :</span>
+                <Slider range defaultValue={1} step={1} min={1} max={slabNumberMax} onChange={slabNumberHandle}/>
+                <Select defaultValue="nearest" onChange={selectInterpolationHandle}>
+                    <Option value="0">Nearest</Option>
+                    <Option value="1">Linear</Option>
+                </Select>
+                <Button onClick={buttonResetHandle}>Reset views</Button>
+            </div>
         </div>
     );
 };
