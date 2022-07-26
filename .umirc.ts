@@ -5,6 +5,7 @@ export default {
     {path: '/docs', component: 'docs'},
     {path: '/spline', component: 'splineWidget'},
     {path: '/reslice', component: 'resliceCursorWidget'},
-    {path: 'paint', component: 'paintWidget'}
+    {path: '/paint', component: 'paintWidget'},
+    {path: '/line', component: 'lineWidget'}
   ]
 };

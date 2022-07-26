@@ -16,6 +16,7 @@ import vtkImageSlice from '@kitware/vtk.js/Rendering/Core/ImageSlice';
 import vtkPaintFilter from '@kitware/vtk.js/Filters/General/PaintFilter';
 import vtkColorTransferFunction from '@kitware/vtk.js/Rendering/Core/ColorTransferFunction';
 import vtkPiecewiseFunction from '@kitware/vtk.js/Common/DataModel/PiecewiseFunction';
+import vtkConeSource from '@kitware/vtk.js/Filters/Sources/ConeSource';
 
 // Force the loading of HttpDataAccessHelper to support gzip decompression
 import '@kitware/vtk.js/IO/Core/DataAccessHelper/HttpDataAccessHelper';
@@ -126,6 +127,7 @@ export default function PaintWidget() {
         scene.splineHandle.setOutputBorder(true);
         scene.polygonHandle.setOutputBorder(true);
 
+        // 使小部件实例获得焦点;lossFocus使小部件实例释放焦点;hasFocus如果小部件实例保持焦点，则返回 true，否则返回 false
         scene.widgetManager.grabFocus(widgets.paintWidget);
 
         // Painting
@@ -384,6 +386,19 @@ export default function PaintWidget() {
     const redoHandle = () => {
         painter.redo();
     };
+    const saveHandle = () => {
+        console.log(scene);
+        // https://github.com/Kitware/vtk-js/issues/812
+        // const stateToSave = {
+        //     actors: scene.renderer.getActors().map(a => a.getState()),
+        //     camera: scene.renderer.getActiveCamera().getState()
+        // };
+        // console.log(stateToSave);
+        // console.log(scene.renderer.getState());
+        // const coneSource = vtkConeSource.newInstance();
+        // const source = coneSource.getOutputData().getPointData().getScalars().getData();
+        // console.log(source);
+    };
     useEffect(() => {
         renderScene();
         // loadImage();
@@ -414,6 +429,7 @@ export default function PaintWidget() {
                 <Button onClick={focusHandle}>Grab focus</Button>
                 <Button onClick={undoHandle}>Undo</Button>
                 <Button onClick={redoHandle}>Redo</Button>
+                <Button onClick={saveHandle}>Save</Button>
             </div>
             <div id="rootContainer"></div>
         </div>
