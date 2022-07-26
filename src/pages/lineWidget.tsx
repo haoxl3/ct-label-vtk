@@ -38,7 +38,7 @@ export default function LineWidget() {
             background: [0, 0, 0],
         });
         const renderer = fullScreenRenderer.getRenderer();
-        renderWindow = fullScreenRenderer.getRenderWindow();
+        renderWindow.current = fullScreenRenderer.getRenderWindow();
         
         const cube = vtkCubeSource.newInstance();
         const mapper = vtkMapper.newInstance();
@@ -60,22 +60,22 @@ export default function LineWidget() {
         if (lineWidget == null) {
             return;
         }
-        lineWidget.getWidgetState().getHandle1().setVisible(e.target.checked);
-        lineWidget.updateHandleVisibility(0);
-        lineWidget.getInteractor().render();
-        renderWindow.render();
+        lineWidget.current.getWidgetState().getHandle1().setVisible(e.target.checked);
+        lineWidget.current.updateHandleVisibility(0);
+        lineWidget.current.getInteractor().render();
+        renderWindow.current.render();
     };
     const visiH2Handle = (e) => {
         console.log(e.target.checked);
-        lineWidget.getWidgetState().getHandle2().setVisible(e.target.checked);
-        lineWidget.updateHandleVisibility(1);
-        lineWidget.getInteractor().render();
-        renderWindow.render();
+        lineWidget.current.getWidgetState().getHandle2().setVisible(e.target.checked);
+        lineWidget.current.updateHandleVisibility(1);
+        lineWidget.current.getInteractor().render();
+        renderWindow.current.render();
     };
     const txtIptHandle = (e) => {
         setTxtIpt(e.target.value);
-        lineWidget.setText(e.target.value);
-        renderWindow.render();
+        lineWidget.current.setText(e.target.value);
+        renderWindow.current.render();
     };
     const setWidgetColor = (currentWidget, color) => {
         currentWidget.getWidgetState().getHandle1().setColor(color);
@@ -83,30 +83,30 @@ export default function LineWidget() {
         currentWidget.getWidgetState().getMoveHandle().setColor(color);
     };
     const observeDistance = () => {
-        lineWidget.onInteractionEvent(() => {
+        lineWidget.current.onInteractionEvent(() => {
             const distance = widget.getDistance().toFixed(2);
             setDistance(distance);
         });
 
-        lineWidget.onEndInteractionEvent(() => {
+        lineWidget.current.onEndInteractionEvent(() => {
             const distance = widget.getDistance().toFixed(2);
             setDistance(distance);
         });
     };
-    const updateHandleShape = (handleId) => {
+    const updateHandleShape = (handleId, shape = 'sphere') => {
         // const e = document.getElementById(`idh${handleId}`);
         // const shape = e.options[e.selectedIndex].value;
-        let shape = '';
-        if (handleId === 1) {
-            shape = idh1;
-        } else {
-            shape = idh2;
-        }
-        const handle = getHandle[handleId];
+        // let shape = '';
+        // if (handleId === 1) {
+        //     shape = idh1;
+        // } else {
+        //     shape = idh2;
+        // }
+        const handle = getHandle.current[handleId];
         if (handle) {
             handle.setShape(shape);
-            lineWidget.updateHandleVisibility(handleId - 1);
-            lineWidget.getInteractor().render();
+            lineWidget.current.updateHandleVisibility(handleId - 1);
+            lineWidget.current.getInteractor().render();
             observeDistance();
         }
     };
@@ -116,11 +116,11 @@ export default function LineWidget() {
         widget = vtkLineWidget.newInstance();
         // widget.placeWidget(cube.getOutputData().getBounds());
         currentHandle = widgetManager.addWidget(widget);
-        lineWidget = currentHandle;
+        lineWidget.current = currentHandle;
 
-        getHandle = {
-            1: lineWidget.getWidgetState().getHandle1(),
-            2: lineWidget.getWidgetState().getHandle2(),
+        getHandle.current = {
+            1: lineWidget.current.getWidgetState().getHandle1(),
+            2: lineWidget.current.getWidgetState().getHandle2(),
         };
 
         updateHandleShape(1);
@@ -136,24 +136,24 @@ export default function LineWidget() {
                     return 1;
                 return 0;
             });
-            getHandle = {
+            getHandle.current = {
                 1: currentHandle.getWidgetState().getHandle1(),
                 2: currentHandle.getWidgetState().getHandle2(),
             };
             setWidgetColor(widgetManager.getWidgets()[selectedWidgetIndex], 0.5);
             setWidgetColor(widgetManager.getWidgets()[index], 0.2);
             selectedWidgetIndex = index;
-            lineWidget = currentHandle;
+            lineWidget.current = currentHandle;
 
-            let idh1value = getHandle[1].getShape() === '' ? 'sphere' : getHandle[1].getShape();
+            let idh1value = getHandle.current[1].getShape() === '' ? 'sphere' : getHandle.current[1].getShape();
             setIdh1(idh1value);
-            let idh2value = getHandle[1].getShape() === '' ? 'sphere' : getHandle[2].getShape();
+            let idh2value = getHandle.current[1].getShape() === '' ? 'sphere' : getHandle.current[2].getShape();
             setIdh2(idh2value);
-            let visiH1Checked = lineWidget.getWidgetState().getHandle1().getVisible();
+            let visiH1Checked = lineWidget.current.getWidgetState().getHandle1().getVisible();
             setVisiH1(visiH1Checked);
-            let visiH2Checked = lineWidget.getWidgetState().getHandle2().getVisible();
+            let visiH2Checked = lineWidget.current.getWidgetState().getHandle2().getVisible();
             setVisiH2(visiH2Checked);
-            let txtIptValue = lineWidget.getWidgetState().getText().getText();
+            let txtIptValue = lineWidget.current.getWidgetState().getText().getText();
             setTxtIpt(txtIptValue);
         });
     };
@@ -165,18 +165,18 @@ export default function LineWidget() {
         }
     };
     const linePosHandle = (value: number) => {
-        const subState = lineWidget.getWidgetState().getPositionOnLine();
+        const subState = lineWidget.current.getWidgetState().getPositionOnLine();
         subState.setPosOnLine(value / 100);
-        lineWidget.placeText();
-        renderWindow.render();
+        lineWidget.current.placeText();
+        renderWindow.current.render();
     };
     const idh1Handle = (value: string) => {
         setIdh1(value);
-        updateHandleShape(1);
+        updateHandleShape(1, value);
     };
     const idh2Handle = (value: string) => {
         setIdh2(value);
-        updateHandleShape(2);
+        updateHandleShape(2, value);
     };
     return (
         <div style={{position: 'absolute', top: 0, left: 0, zIndex: 1, background: '#fff'}}>
