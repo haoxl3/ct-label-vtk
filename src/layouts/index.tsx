@@ -8,9 +8,6 @@ export default function Layout() {
         <li>
           <Link to="/">Home</Link>
         </li>
-        <li>
-          <Link to="/docs">Docs</Link>
-        </li>
       </ul>
       <Outlet />
     </div>
