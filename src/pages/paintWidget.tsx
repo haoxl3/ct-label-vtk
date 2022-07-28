@@ -33,7 +33,7 @@ import 'antd/dist/antd.less';
 export default function PaintWidget() {
     const scene = useRef({});
     const widgets = useRef({});
-    const image = {};
+    const image = useRef({});
     let activeWidget = 'paintWidget';
     // Paint filter
     const painter = vtkPaintFilter.newInstance();
@@ -344,10 +344,12 @@ export default function PaintWidget() {
         setRadius(value);
     };
     const sliceHandle = (value: number) => {
+        debugger
         image.imageMapper.setSlice(value);
         setSlice(value);
     };
     const axisHandle = (value: string) => {
+        debugger
         const sliceMode = 'IJKXYZ'.indexOf(value) % 3;
         image.imageMapper.setSlicingMode(sliceMode);
         painter.setSlicingMode(sliceMode);
@@ -409,9 +411,9 @@ export default function PaintWidget() {
         <div>
             <div style={{position: 'absolute', top: 0, left: 0, zIndex: 1, background: '#fff'}}>
                 <span>Radius Scale</span>
-                <Slider range value={radius} step={1} min={1} max={200} onChange={radiuHandle} style={{width: '100px', display: 'inline-block'}}/>
+                <Slider value={radius} step={1} min={1} max={200} onChange={radiuHandle} style={{width: '100px', display: 'inline-block'}}/>
                 <span>Slice</span>
-                <Slider range value={slice} step={1} min={sliceMin} max={sliceMax} onChange={sliceHandle} style={{width: '100px', display: 'inline-block'}}/>
+                <Slider value={slice} step={1} min={sliceMin} max={sliceMax} onChange={sliceHandle} style={{width: '100px', display: 'inline-block'}}/>
                 <span>Slice Axis</span>
                 <Select value={axis} onChange={axisHandle}>
                     <Option value="I">I</Option>

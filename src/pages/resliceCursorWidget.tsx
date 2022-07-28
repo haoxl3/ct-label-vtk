@@ -103,6 +103,7 @@ export default function ResliceCursorWidget() {
             interactionContext.keepFocalPointPosition,
             interactionContext.computeFocalPointOffset
         );
+        debugger
         view3D.renderWindow.render();
         return obj.modified;
     };
@@ -337,8 +338,10 @@ export default function ResliceCursorWidget() {
             });
             obj.renderWindow.render();
         });
-        view3D.renderer.resetCamera();
-        view3D.renderer.resetCameraClippingRange();
+        if (view3D) {
+            view3D.renderer.resetCamera();
+            view3D.renderer.resetCameraClippingRange();
+        }
     };
     const checkboxOrthogalityHandle = (e: CheckboxChangeEvent) => {
         console.log(e.target.checked);
@@ -379,7 +382,7 @@ export default function ResliceCursorWidget() {
         setSlabNumber(value);
         updateViews();
     };
-    const selectInterpolationHandle = (value: string) => {
+    const selectInterpolationHandle = (value: number) => {
         console.log(value);
         viewAttributes.forEach((obj) => {
             obj.reslice.setInterpolationMode(Number(value));
@@ -410,7 +413,7 @@ export default function ResliceCursorWidget() {
                     <Option value="3">SUM</Option>
                 </Select>
                 <span>Slab Number of Slices :</span>
-                <Slider range value={slabNumber} step={1} min={1} max={slabNumberMax} onChange={slabNumberHandle} style={{width: '100px', display: 'inline-block'}}/>
+                <Slider value={slabNumber} step={1} min={1} max={slabNumberMax} onChange={slabNumberHandle} style={{width: '100px', display: 'inline-block'}}/>
                 <Select value={selectInterpolation} onChange={selectInterpolationHandle}>
                     <Option value={0}>Nearest</Option>
                     <Option value={1}>Linear</Option>
