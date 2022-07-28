@@ -78,6 +78,7 @@ export default function SplineWidget() {
         renderWindow.current.render();
     };
     const continuityHandle = (value: number) => {
+        debugger
         setContinuity(value);
         widget.current.getWidgetState().setSplineContinuity(value);
         renderWindow.current.render();
@@ -174,31 +175,31 @@ export default function SplineWidget() {
                 <Row>
                     <Col span={12}>Tension</Col>
                     <Col span={12}>
-                        <Slider range value={tension} step={0.1} min={-1} max={1} onChange={tensionHandle} disabled={tensionInputDisabled}/>
+                        <Slider value={tension} step={0.1} min={-1} max={1} onChange={tensionHandle} disabled={tensionInputDisabled}/>
                     </Col>
                 </Row>
                 <Row>
                     <Col span={12}>Bias</Col>
                     <Col span={12}>
-                        <Slider range value={bias} step={0.1} min={-1} max={1} onChange={biasHandle} disabled={biasInputDisabled}/>
+                        <Slider value={bias} step={0.1} min={-1} max={1} onChange={biasHandle} disabled={biasInputDisabled}/>
                     </Col>
                 </Row>
                 <Row>
                     <Col span={12}>Continuity</Col>
                     <Col span={12}>
-                        <Slider range value={continuity} step={0.1} min={-1} max={1} onChange={continuityHandle} disabled={continuityInputDisabled}/>
+                        <Slider value={continuity} step={0.1} min={-1} max={1} onChange={continuityHandle} disabled={continuityInputDisabled}/>
                     </Col>
                 </Row>
                 <Row>
                     <Col span={12}>Resolution</Col>
                     <Col span={12}>
-                        <Slider range value={resolution} step={1} min={1} max={32} onChange={resolutionHandle}/>
+                        <Slider value={resolution} step={1} min={1} max={32} onChange={resolutionHandle}/>
                     </Col>
                 </Row>
                 <Row>
                     <Col span={12}>Handles size</Col>
                     <Col span={12}>
-                        <Slider range value={handleSize} step={1} min={10} max={50} onChange={handleSizeHandle}/>
+                        <Slider value={handleSize} step={1} min={10} max={50} onChange={handleSizeHandle}/>
                     </Col>
                 </Row>
                 <Row>
@@ -207,7 +208,7 @@ export default function SplineWidget() {
                         <Checkbox checked={allowFreehand} onChange={allowFreehandHandle}></Checkbox>
                     </Col>
                     <Col span={9}>
-                        <Slider range value={freehandDistance} step={0.05} min={0.05} max={1} onChange={freehandDistanceHandle}/>
+                        <Slider value={freehandDistance} step={0.05} min={0.05} max={1} onChange={freehandDistanceHandle}/>
                     </Col>
                 </Row>
                 <Row>
@@ -230,13 +231,13 @@ export default function SplineWidget() {
                 <Row>
                     <Col span={12}>Boundary Condition value X</Col>
                     <Col span={12}>
-                        <Slider range value={boundaryConditionValueX} step={0.1} min={-2} max={2} onChange={boundaryConditionValueXHandle} disabled={boundaryConditionValueXDisabled}/>
+                        <Slider value={boundaryConditionValueX} step={0.1} min={-2} max={2} onChange={boundaryConditionValueXHandle} disabled={boundaryConditionValueXDisabled}/>
                     </Col>
                 </Row>
                 <Row>
                     <Col span={12}>Boundary Condition value Y</Col>
                     <Col span={12}>
-                        <Slider range value={boundaryConditionValueY} step={0.1} min={-2} max={2} onChange={boundaryConditionValueYHandle} disabled={boundaryConditionValueYDisabled}/>
+                        <Slider value={boundaryConditionValueY} step={0.1} min={-2} max={2} onChange={boundaryConditionValueYHandle} disabled={boundaryConditionValueYDisabled}/>
                     </Col>
                 </Row>
                 <Row>
