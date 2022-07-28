@@ -78,7 +78,6 @@ export default function SplineWidget() {
         renderWindow.current.render();
     };
     const continuityHandle = (value: number) => {
-        debugger
         setContinuity(value);
         widget.current.getWidgetState().setSplineContinuity(value);
         renderWindow.current.render();
@@ -105,7 +104,6 @@ export default function SplineWidget() {
         widgetRepresentation.current.setFreehandMinDistance(value);
     };
     const closeHandle = (e: CheckboxChangeEvent) => {
-        debugger
         setClose(e.target.checked);
 
         setBoundaryConditionDisabled(e.target.checked);
@@ -115,7 +113,6 @@ export default function SplineWidget() {
         renderWindow.current.render();
     };
     const boundaryConditionHandle = (value: number) => {
-        debugger
         setBoundaryCondition(value);
 
         const isDefault = value === 0;
