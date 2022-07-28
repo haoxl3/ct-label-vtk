@@ -178,10 +178,10 @@ export default function ShapeWidget() {
 
             // set text display callback
             scene.ellipseHandle.onInteractionEvent(() => {
-                const worldBounds = scene.ellipseHandle.getBounds();
-                const { average, minimum, maximum } = image.data.computeHistogram(worldBounds, vtkSphere.isPointIn3DEllipse);
-                const text = `average: ${average.toFixed(0)} \nmin: ${minimum} \nmax: ${maximum} `;
-                widgets.ellipseWidget.getWidgetState().getText().setText(text);
+                // const worldBounds = scene.ellipseHandle.getBounds();
+                // const { average, minimum, maximum } = image.data.computeHistogram(worldBounds, vtkSphere.isPointIn3DEllipse);
+                // const text = `average: ${average.toFixed(0)} \nmin: ${minimum} \nmax: ${maximum} `;
+                // widgets.ellipseWidget.getWidgetState().getText().setText(text);
             });
 
             scene.circleHandle.onInteractionEvent(() => {
@@ -218,9 +218,6 @@ export default function ShapeWidget() {
                     scene.renderWindow.render();
                     // update UI
                     setSliceMax(data.getDimensions()[slicingMode] - 1);
-                    // document
-                    // .querySelector('.slice')
-                    // .setAttribute('max', data.getDimensions()[slicingMode] - 1);
                 }
             };
             image.imageMapper.onModified(update);
@@ -258,15 +255,15 @@ export default function ShapeWidget() {
     };
     const widgetHandle = (value: string) => {
         // For demo purpose, hide ellipse handles when the widget loses focus
-        if (activeWidget === 'ellipseWidget') {
-            widgets.ellipseWidget.setHandleVisibility(false);
-        }
+        // if (activeWidget === 'ellipseWidget') {
+        //     widgets.ellipseWidget.setHandleVisibility(false);
+        // }
         scene.widgetManager.grabFocus(widgets[value]);
         activeWidget = value;
-        if (activeWidget === 'ellipseWidget') {
-            widgets.ellipseWidget.setHandleVisibility(true);
-            scene.ellipseHandle.updateRepresentationForRender();
-        }
+        // if (activeWidget === 'ellipseWidget') {
+        //     widgets.ellipseWidget.setHandleVisibility(true);
+        //     scene.ellipseHandle.updateRepresentationForRender();
+        // }
 
         setWidget(value);
     };
