@@ -5,6 +5,7 @@ export default {
     {path: '/spline', component: 'splineWidget'},
     {path: '/reslice', component: 'resliceCursorWidget'},
     {path: '/paint', component: 'paintWidget'},
-    {path: '/line', component: 'lineWidget'}
+    {path: '/line', component: 'lineWidget'},
+    {path: '/xml', component: 'XMLPolyDataWriter'}
   ]
 };
