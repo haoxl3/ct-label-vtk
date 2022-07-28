@@ -6,6 +6,7 @@ export default {
     {path: '/reslice', component: 'resliceCursorWidget'},
     {path: '/paint', component: 'paintWidget'},
     {path: '/line', component: 'lineWidget'},
-    {path: '/xml', component: 'XMLPolyDataWriter'}
+    {path: '/xml', component: 'XMLPolyDataWriter'},
+    {path: '/shape', component: 'shapeWidget'}
   ]
 };

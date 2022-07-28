@@ -344,12 +344,10 @@ export default function PaintWidget() {
         setRadius(value);
     };
     const sliceHandle = (value: number) => {
-        debugger
         image.imageMapper.setSlice(value);
         setSlice(value);
     };
     const axisHandle = (value: string) => {
-        debugger
         const sliceMode = 'IJKXYZ'.indexOf(value) % 3;
         image.imageMapper.setSlicingMode(sliceMode);
         painter.setSlicingMode(sliceMode);
