@@ -17,6 +17,9 @@ import vtkPaintFilter from '@kitware/vtk.js/Filters/General/PaintFilter';
 import vtkColorTransferFunction from '@kitware/vtk.js/Rendering/Core/ColorTransferFunction';
 import vtkPiecewiseFunction from '@kitware/vtk.js/Common/DataModel/PiecewiseFunction';
 import vtkConeSource from '@kitware/vtk.js/Filters/Sources/ConeSource';
+import vtkXMLImageDataReader from '@kitware/vtk.js/IO/XML/XMLImageDataReader';
+import vtkXMLImageDataWriter from '@kitware/vtk.js/IO/XML/XMLImageDataWriter';
+import vtkXMLWriter from '@kitware/vtk.js/IO/XML/XMLWriter';
 
 // Force the loading of HttpDataAccessHelper to support gzip decompression
 import '@kitware/vtk.js/IO/Core/DataAccessHelper/HttpDataAccessHelper';
@@ -44,6 +47,7 @@ export default function PaintWidget() {
     const [widget, setWidget] = useState('paintWidget');
     const [sliceMin, setSliceMin] = useState(1);
     const [sliceMax, setSliceMax] = useState(132);
+    const fileContents = useRef({});
 
     const initializeHandle = (handle) => {
         handle.onStartInteractionEvent(() => {
@@ -247,9 +251,19 @@ export default function PaintWidget() {
         // opacity is applied to entire labelmap
         labelMap.actor.getProperty().setOpacity(0.5);
         const reader = vtkHttpDataSetReader.newInstance({ fetchGzip: true });
-        // https://kitware.github.io/vtk-js/data/volume/LIDC2.vti
+        
+        const writer = vtkXMLImageDataWriter.newInstance();
+        writer.setFormat(vtkXMLWriter.FormatTypes.BINARY);
+        writer.setInputConnection(reader.getOutputPort());
+
+        const writerReader = vtkXMLImageDataReader.newInstance();
         reader.setUrl(`https://kitware.github.io/vtk-js/data/volume/LIDC2.vti`, { loadData: true }).then(() => {
+            fileContents.current = writer.write(reader.getOutputData());
             const data = reader.getOutputData();
+            // Try to read it back.
+            const textEncoder = new TextEncoder();
+            writerReader.parseAsArrayBuffer(textEncoder.encode(fileContents.current));
+
             image.data = data;
             // set input data
             image.imageMapper.setInputData(data);
@@ -399,8 +413,8 @@ export default function PaintWidget() {
         // const coneSource = vtkConeSource.newInstance();
         // const source = coneSource.getOutputData().getPointData().getScalars().getData();
         // console.log(source);
-        const fileContents = image.data;
-        const blob = new Blob([fileContents], {type: 'text/plain'});
+        debugger
+        const blob = new Blob([fileContents.current], {type: 'text/plain'});
         const a = window.document.createElement('a');
         a.href = window.URL.createObjectURL(blob, {type: 'text/plain'});
         a.download = 'LIDC2.vti';
