@@ -21,6 +21,7 @@ import {
 import { VerticalTextAlignment } from '@kitware/vtk.js/Widgets/SVG/SVGLandmarkRepresentation/Constants';
 import { ViewTypes } from '@kitware/vtk.js/Widgets/Core/WidgetManager/Constants';
 import { vec3 } from 'gl-matrix';
+import DeepEqual from 'deep-equal';
 
 import {Select, Slider, Button, Row, Col} from 'antd';
 const {Option} = Select;
@@ -37,6 +38,8 @@ export default function ShapeWidget() {
     const [slice, setSlice] = useState(1);
     const [axis, setAxis] = useState('K');
     const [widget, setWidget] = useState('ellipseWidget');
+    const [widgetVisible, setWidgetVisible] = useState(true);
+    let selectedWidgetIndex = 0;
 
     const resetWidgets = () => {
         scene.rectangleHandle.reset();
@@ -143,6 +146,7 @@ export default function ShapeWidget() {
         scene.circleHandle.setGlyphResolution(64);
         // 使小部件实例获得焦点;
         scene.widgetManager.grabFocus(widgets.ellipseWidget);
+        widgetHandle(activeWidget);
 
         loadImage();
     };
@@ -266,10 +270,45 @@ export default function ShapeWidget() {
         // }
 
         setWidget(value);
+        // debugger
+        // let currentHandle = scene.widgetManager.addWidget(widgets[value]);
+        // currentHandle.onStartInteractionEvent(() => {
+        //     const index = scene.widgetManager.getWidgets().findIndex((cwidget) => {
+        //         return DeepEqual(currentHandle.getWidgetState(), cwidget.getWidgetState());
+        //     });
+        //     setWidgetColor(scene.widgetManager.getWidgets()[selectedWidgetIndex], 0.5);
+        //     setWidgetColor(scene.widgetManager.getWidgets()[index], 0.2);
+        // });
     };
     const resetHandle = () => {
         resetWidgets();
         scene.renderWindow.render();
+    };
+    const setWidgetColor = (currentWidget, color) => {
+        currentWidget.getWidgetState().getPoint1Handle().setColor(color);
+        currentWidget.getWidgetState().getPoint2Handle().setColor(color);
+    };
+    const delHandle = () => {
+        // const widgets = scene.widgetManager.getWidgets();
+        // if (!widgets.length) return;
+        // scene.widgetManager.removeWidget(widgets[widgets.length - 1]);
+        
+        // const focusWidget = scene.widgetManager.grabFocus();
+        // let selectedWidgetIndex = scene.widgetManager.getWidgets().findIndex((cwidget) => {
+        //     return DeepEqual(focusWidget.getWidgetState(), cwidget.getWidgetState());
+        // });
+        // if (selectedWidgetIndex === -1) {
+        //     selectedWidgetIndex = scene.widgetManager.getWidgets().length - 1;
+        // }
+        // scene.widgetManager.removeWidget(scene.widgetManager.getWidgets()[selectedWidgetIndex]);
+    };
+    const visibleToggle = (widgetVisible) => {
+        const allWidgets = scene.widgetManager.getWidgets();
+        allWidgets.forEach(widget => {
+            widget.setVisibility(!widgetVisible);
+        });
+        scene.renderWindow.render();
+        setWidgetVisible(!widgetVisible);
     };
     useEffect(() => {
         renderScene();
@@ -315,8 +354,14 @@ export default function ShapeWidget() {
                     </Col>
                 </Row>
                 <Row>
-                    <Col span={24}>
+                    <Col span={8}>
                         <Button onClick={resetHandle}>Reset</Button>
+                    </Col>
+                    <Col span={8}>
+                        <Button onClick={delHandle}>删除</Button>
+                    </Col>
+                    <Col span={8}>
+                        <Button onClick={() => visibleToggle(widgetVisible)}>{widgetVisible ? '隐藏':'显示'}</Button>
                     </Col>
                 </Row>
             </div>
