@@ -247,6 +247,7 @@ export default function PaintWidget() {
         // opacity is applied to entire labelmap
         labelMap.actor.getProperty().setOpacity(0.5);
         const reader = vtkHttpDataSetReader.newInstance({ fetchGzip: true });
+        // https://kitware.github.io/vtk-js/data/volume/LIDC2.vti
         reader.setUrl(`https://kitware.github.io/vtk-js/data/volume/LIDC2.vti`, { loadData: true }).then(() => {
             const data = reader.getOutputData();
             image.data = data;
@@ -398,6 +399,15 @@ export default function PaintWidget() {
         // const coneSource = vtkConeSource.newInstance();
         // const source = coneSource.getOutputData().getPointData().getScalars().getData();
         // console.log(source);
+        const fileContents = image.data;
+        const blob = new Blob([fileContents], {type: 'text/plain'});
+        const a = window.document.createElement('a');
+        a.href = window.URL.createObjectURL(blob, {type: 'text/plain'});
+        a.download = 'LIDC2.vti';
+        document.body.appendChild(a);
+        a.click(); 
+        window.URL.revokeObjectURL(a.href);
+        document.body.removeChild(a);  
     };
     useEffect(() => {
         renderScene();
