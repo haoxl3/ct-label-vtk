@@ -151,7 +151,7 @@ export default function PaintWidget() {
             const corner = rectangleHandle.getCorner();
         
             if (origin && corner) {
-            painter.paintRectangle(origin, corner);
+                painter.paintRectangle(origin, corner);
             }
         });
         initializeHandle(scene.rectangleHandle);
@@ -413,7 +413,6 @@ export default function PaintWidget() {
         // const coneSource = vtkConeSource.newInstance();
         // const source = coneSource.getOutputData().getPointData().getScalars().getData();
         // console.log(source);
-        debugger
         const blob = new Blob([fileContents.current], {type: 'text/plain'});
         const a = window.document.createElement('a');
         a.href = window.URL.createObjectURL(blob, {type: 'text/plain'});
@@ -421,7 +420,11 @@ export default function PaintWidget() {
         document.body.appendChild(a);
         a.click(); 
         window.URL.revokeObjectURL(a.href);
-        document.body.removeChild(a);  
+        document.body.removeChild(a); 
+        // const serializedRuler = {
+        //     points: widgetState.getHandles().map((handleState) => handleState.getOrigin()),
+        //     color: '#ffee00',
+        // }
     };
     useEffect(() => {
         renderScene();

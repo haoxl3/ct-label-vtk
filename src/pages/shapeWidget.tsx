@@ -312,6 +312,7 @@ export default function ShapeWidget() {
     };
     useEffect(() => {
         renderScene();
+        
         window.addEventListener('resize', readyAll);
     }, []);
     return (

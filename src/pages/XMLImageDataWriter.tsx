@@ -15,19 +15,23 @@ import vtkXMLWriter from '@kitware/vtk.js/IO/XML/XMLWriter';
 import '@kitware/vtk.js/IO/Core/DataAccessHelper/HttpDataAccessHelper';
 
 export default function XMLImageDataWriter() {
-    const initHandle = () => {
+    const initHandle = async () => {
         const fullScreenRenderer = vtkFullScreenRenderWindow.newInstance();
         const renderer = fullScreenRenderer.getRenderer();
         const renderWindow = fullScreenRenderer.getRenderWindow();
 
-        const reader = vtkHttpDataSetReader.newInstance({ fetchGzip: true });
+        // const reader = vtkHttpDataSetReader.newInstance({ fetchGzip: true });
+        const reader = vtkXMLImageDataReader.newInstance();
+        const response = await fetch('http://172.22.150.28:8000/img/headsq.vti');
+        const arrayBuffer = await response.arrayBuffer();
+        reader.parseAsArrayBuffer(arrayBuffer);
 
         const writer = vtkXMLImageDataWriter.newInstance();
         writer.setFormat(vtkXMLWriter.FormatTypes.BINARY);
         writer.setInputConnection(reader.getOutputPort());
 
         const writerReader = vtkXMLImageDataReader.newInstance();
-        reader.setUrl(`https://kitware.github.io/vtk-js/data/volume/headsq.vti`, { loadData: true }).then(() => {
+        // reader.setUrl(`https://kitware.github.io/vtk-js/data/volume/headsq.vti`, { loadData: true }).then(() => {
             const fileContents = writer.write(reader.getOutputData());
         
             // Try to read it back.
@@ -47,7 +51,8 @@ export default function XMLImageDataWriter() {
             document.body.appendChild(a);
             a.style.background = 'white';
             a.style.padding = '5px';
-        });
+        // });
+
         const actor = vtkVolume.newInstance();
         const mapper = vtkVolumeMapper.newInstance();
         mapper.setSampleDistance(1.1);
