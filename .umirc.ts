@@ -8,7 +8,8 @@ export default {
     {path: '/line', component: 'lineWidget'},
     // {path: '/xml', component: 'XMLPolyDataWriter'},
     {path: '/xml', component: 'XMLImageDataWriter'},
-    {path: '/shape', component: 'shapeWidget'}
+    {path: '/shape', component: 'shapeWidget'},
+    {path: '/all', component: 'comprehensive'}
   ],
   proxy: {
     '/img': {
