@@ -270,7 +270,6 @@ export default function ShapeWidget() {
         // }
 
         setWidget(value);
-        // debugger
         // let currentHandle = scene.widgetManager.addWidget(widgets[value]);
         // currentHandle.onStartInteractionEvent(() => {
         //     const index = scene.widgetManager.getWidgets().findIndex((cwidget) => {
@@ -289,9 +288,9 @@ export default function ShapeWidget() {
         currentWidget.getWidgetState().getPoint2Handle().setColor(color);
     };
     const delHandle = () => {
-        // const widgets = scene.widgetManager.getWidgets();
-        // if (!widgets.length) return;
-        // scene.widgetManager.removeWidget(widgets[widgets.length - 1]);
+        const widgets = scene.widgetManager.getWidgets();
+        if (!widgets.length) return;
+        scene.widgetManager.removeWidget(widgets[widgets.length - 1]);
         
         // const focusWidget = scene.widgetManager.grabFocus();
         // let selectedWidgetIndex = scene.widgetManager.getWidgets().findIndex((cwidget) => {

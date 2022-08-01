@@ -103,7 +103,6 @@ export default function ResliceCursorWidget() {
             interactionContext.keepFocalPointPosition,
             interactionContext.computeFocalPointOffset
         );
-        debugger
         view3D.renderWindow.render();
         return obj.modified;
     };
