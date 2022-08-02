@@ -250,16 +250,21 @@ export default function PaintWidget() {
         labelMap.actor.getProperty().setPiecewiseFunction(labelMap.ofun);
         // opacity is applied to entire labelmap
         labelMap.actor.getProperty().setOpacity(0.5);
-        const reader = vtkHttpDataSetReader.newInstance({ fetchGzip: true });
         
+        const reader = vtkHttpDataSetReader.newInstance({ fetchGzip: true });
+        // const reader = vtkXMLImageDataReader.newInstance();
+        // const response = await fetch('http://172.22.150.28:8000/img/LIDC2.vti');
+        // const arrayBuffer = await response.arrayBuffer();
+        // reader.parseAsArrayBuffer(arrayBuffer);
+
         const writer = vtkXMLImageDataWriter.newInstance();
         writer.setFormat(vtkXMLWriter.FormatTypes.BINARY);
         writer.setInputConnection(reader.getOutputPort());
 
         const writerReader = vtkXMLImageDataReader.newInstance();
         reader.setUrl(`https://kitware.github.io/vtk-js/data/volume/LIDC2.vti`, { loadData: true }).then(() => {
-            fileContents.current = writer.write(reader.getOutputData());
             const data = reader.getOutputData();
+            // fileContents.current = writer.write(data);
             // Try to read it back.
             const textEncoder = new TextEncoder();
             writerReader.parseAsArrayBuffer(textEncoder.encode(fileContents.current));

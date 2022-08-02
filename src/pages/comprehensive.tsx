@@ -31,6 +31,10 @@ import { xyzToViewType } from '@kitware/vtk.js/Widgets/Widgets3D/ResliceCursorWi
 import '@kitware/vtk.js/IO/Core/DataAccessHelper/HttpDataAccessHelper';
 // widget
 import vtkLineWidget from '@kitware/vtk.js/Widgets/Widgets3D/LineWidget';
+import vtkPaintWidget from '@kitware/vtk.js/Widgets/Widgets3D/PaintWidget';
+import vtkPaintFilter from '@kitware/vtk.js/Filters/General/PaintFilter';
+import vtkColorTransferFunction from '@kitware/vtk.js/Rendering/Core/ColorTransferFunction';
+import vtkPiecewiseFunction from '@kitware/vtk.js/Common/DataModel/PiecewiseFunction';
 import { ViewTypes } from '@kitware/vtk.js/Widgets/Core/WidgetManager/Constants';
 
 import {Checkbox, Select, Slider, Button} from 'antd';
@@ -70,6 +74,9 @@ export default function Comprehensive() {
     const [selectInterpolation, setSelectInterpolation] = useState(0);
 
     const lineWidget = vtkLineWidget.newInstance();
+    const paintWidget = vtkPaintWidget.newInstance();
+    // Paint filter
+    const painter = vtkPaintFilter.newInstance();
 
     const createRGBStringFromRGBValues = (rgb) => {
         if (rgb.length !== 3) {
@@ -111,6 +118,25 @@ export default function Comprehensive() {
         );
         view3D.renderWindow.render();
         return obj.modified;
+    };
+    const updateHandle = (objImageMapper, paintHandle, data) => {
+        const slicingMode = objImageMapper.getSlicingMode() % 3;
+        if (slicingMode > -1) {
+            const ijk = [0, 0, 0];
+            const position = [0, 0, 0];
+            // position
+            ijk[slicingMode] = objImageMapper.getSlice();
+            data.indexToWorld(ijk, position);
+
+            paintWidget.getManipulator().setUserOrigin(position);
+
+            painter.setSlicingMode(slicingMode);
+
+            paintHandle.updateRepresentationForRender();
+
+            // update labelMap layer
+            // labelMap.imageMapper.set(objImageMapper.get('slice', 'slicingMode'));
+        }
     };
     const renderContainer = () => {
         const container = document.getElementById('container');
@@ -261,47 +287,63 @@ export default function Comprehensive() {
                 view3D.renderer.addActor(outlineActor);
 
                 viewAttributes.forEach((obj, i) => {
+                    let labelMap = {
+                        imageMapper: vtkImageMapper.newInstance(),
+                        actor: vtkImageSlice.newInstance(),
+                        cfun: vtkColorTransferFunction.newInstance(),
+                        ofun: vtkPiecewiseFunction.newInstance(),
+                    };
+                    // labelmap pipeline
+                    labelMap.actor.setMapper(labelMap.imageMapper);
+                    labelMap.imageMapper.setInputConnection(painter.getOutputPort());
+                    
+                    // set up labelMap color and opacity mapping
+                    labelMap.cfun.addRGBPoint(1, 0, 0, 1); // label "1" will be blue
+                    labelMap.ofun.addPoint(0, 0); // our background value, 0, will be invisible
+                    labelMap.ofun.addPoint(1, 1); // all values above 1 will be fully opaque
+                    
+                    labelMap.actor.getProperty().setRGBTransferFunction(labelMap.cfun);
+                    labelMap.actor.getProperty().setPiecewiseFunction(labelMap.ofun);
+                    // opacity is applied to entire labelmap
+                    labelMap.actor.getProperty().setOpacity(0.5);
+                    
                     obj.reslice.setInputData(image);
                     obj.renderer.addActor(obj.resliceActor);
                     view3D.renderer.addActor(obj.resliceActor);
+                    obj.renderer.addViewProp(labelMap.actor);
+                    view3D.renderer.addViewProp(labelMap.actor);
                     obj.sphereActors.forEach((actor) => {
                       obj.renderer.addActor(actor);
                       view3D.renderer.addActor(actor);
+
+                      obj.renderer.addViewProp(labelMap.actor);
+                      view3D.renderer.addViewProp(labelMap.actor);
                     });
                     const reslice = obj.reslice;
                     const viewType = xyzToViewType[i];
               
-                    viewAttributes
-                      // No need to update plane nor refresh when interaction
-                      // is on current view. Plane can't be changed with interaction on current
-                      // view. Refreshs happen automatically with `animation`.
-                      // Note: Need to refresh also the current view because of adding the mouse wheel
-                      // to change slicer
-                    .forEach((v) => {
+                    //No need to update plane nor refresh when interaction  is on current view. Plane can't be changed with interaction on current view. Refreshs happen automatically with `animation`.  Note: Need to refresh also the current view because of adding the mouse wheel to change slicer
+                    viewAttributes.forEach((v) => {
                         // Interactions in other views may change current plane
                         v.widgetInstance.onInteractionEvent(
-                            // computeFocalPointOffset: Boolean which defines if the offset between focal point and
-                            // reslice cursor display center has to be recomputed (while translation is applied)
-                            // canUpdateFocalPoint: Boolean which defines if the focal point can be updated because
-                            // the current interaction is a rotation
+                            // computeFocalPointOffset: Boolean which defines if the offset between focal point and reslice cursor display center has to be recomputed (while translation is applied) canUpdateFocalPoint: Boolean which defines if the focal point can be updated because the current interaction is a rotation
                             ({ computeFocalPointOffset, canUpdateFocalPoint }) => {
-                            const activeViewType = widget
-                                .getWidgetState()
-                                .getActiveViewType();
-                            const keepFocalPointPosition =
-                                activeViewType !== viewType && canUpdateFocalPoint;
-                            updateReslice({
-                                viewType,
-                                reslice,
-                                actor: obj.resliceActor,
-                                renderer: obj.renderer,
-                                resetFocalPoint: false,
-                                keepFocalPointPosition,
-                                computeFocalPointOffset,
-                                sphereSources: obj.sphereSources,
-                            });
+                                const activeViewType = widget.getWidgetState().getActiveViewType();
+                                const keepFocalPointPosition = activeViewType !== viewType && canUpdateFocalPoint;
+                                updateReslice({
+                                    viewType,
+                                    reslice,
+                                    actor: obj.resliceActor,
+                                    renderer: obj.renderer,
+                                    resetFocalPoint: false,
+                                    keepFocalPointPosition,
+                                    computeFocalPointOffset,
+                                    sphereSources: obj.sphereSources,
+                                });
                             }
                         );
+                        let handle = obj.widgetManager.addWidget(paintWidget, ViewTypes.SLICE);
+                        updateHandle(v.resliceMapper, handle, image);
                     });
               
                     updateReslice({
@@ -402,7 +444,7 @@ export default function Comprehensive() {
     };
     const addLineHandle = () => {
         viewAttributes.forEach(obj => {
-            obj.widgetManager.releaseFocus(widget);
+            // obj.widgetManager.releaseFocus(widget);
             let handle = obj.widgetManager.addWidget(lineWidget, ViewTypes.SLICE);
             let widgetState = handle.getWidgetState();
             widgetState.setLineThickness(2);
@@ -413,6 +455,30 @@ export default function Comprehensive() {
             widgetState.onModified(() => {
                 handle.setText(lineWidget.getDistance().toFixed(2));
             });
+        });
+    };
+    const initializeHandle = (handle) => {
+        handle.onStartInteractionEvent(() => {
+            painter.startStroke();
+        });
+        handle.onEndInteractionEvent(() => {
+            painter.endStroke();
+        });
+    };
+    const addPaintHandle = () => {
+        viewAttributes.forEach(obj => {
+            let handle = obj.widgetManager.addWidget(paintWidget, ViewTypes.SLICE);
+            obj.widgetManager.grabFocus(paintWidget);
+            handle.setVisibility(true);
+            handle.updateRepresentationForRender();
+            handle.onStartInteractionEvent(() => {
+                painter.startStroke();
+                painter.addPoint(paintWidget.getWidgetState().getTrueOrigin());
+            });
+            handle.onInteractionEvent(() => {
+                painter.addPoint(paintWidget.getWidgetState().getTrueOrigin());
+            });
+            initializeHandle(handle);
         });
     };
     useEffect(() => {
@@ -440,6 +506,7 @@ export default function Comprehensive() {
                 </Select>
                 <Button onClick={buttonResetHandle} type="primary">Reset views</Button>
                 <Button onClick={addLineHandle}>addLine</Button>
+                <Button onClick={addPaintHandle}>addPaint</Button>
             </div>
         </div>
     );
