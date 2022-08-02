@@ -266,8 +266,8 @@ export default function PaintWidget() {
             const data = reader.getOutputData();
             // fileContents.current = writer.write(data);
             // Try to read it back.
-            const textEncoder = new TextEncoder();
-            writerReader.parseAsArrayBuffer(textEncoder.encode(fileContents.current));
+            // const textEncoder = new TextEncoder();
+            // writerReader.parseAsArrayBuffer(textEncoder.encode(fileContents.current));
 
             image.data = data;
             // set input data
