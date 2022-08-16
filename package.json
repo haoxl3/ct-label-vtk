@@ -1,6 +1,6 @@
 {
   "private": true,
-  "author": "haoxiaoli <haoxiaoli@baidu.com>",
+  "author": "haoxl",
   "scripts": {
     "dev": "umi dev",
     "build": "umi build",
@@ -9,10 +9,7 @@
     "start": "npm run dev"
   },
   "dependencies": {
-    "@kitware/vtk.js": "^25.2.3",
     "antd": "^4.21.7",
-    "deep-equal": "^2.0.5",
-    "gl-matrix": "^3.4.3",
     "umi": "^4.0.7"
   },
   "devDependencies": {
