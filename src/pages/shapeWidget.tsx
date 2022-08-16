@@ -238,9 +238,13 @@ export default function ShapeWidget() {
         } else {
             scope.widgetManager.disablePicking();
         }
+        renderData();
     };
     const readyAll = () => {
         readyHandle(scene, true);
+    };
+    const renderData = () => {
+
     };
     // UI
     const sliceHandle = (value: number) => {
@@ -309,6 +313,14 @@ export default function ShapeWidget() {
         scene.renderWindow.render();
         setWidgetVisible(!widgetVisible);
     };
+    const saveHandle = () => {
+        const circle = scene.circleHandle.getBounds();
+        const ellipse =  scene.ellipseHandle.getBounds();
+        const worldBounds = scene.rectangleHandle.getBounds();
+        const dx = Math.abs(worldBounds[0] - worldBounds[1]);
+        const dy = Math.abs(worldBounds[2] - worldBounds[3]);
+        const dz = Math.abs(worldBounds[4] - worldBounds[5]);
+    };
     useEffect(() => {
         renderScene();
         
@@ -354,14 +366,17 @@ export default function ShapeWidget() {
                     </Col>
                 </Row>
                 <Row>
-                    <Col span={8}>
+                    <Col span={6}>
                         <Button onClick={resetHandle}>Reset</Button>
                     </Col>
-                    <Col span={8}>
+                    <Col span={6}>
                         <Button onClick={delHandle}>删除</Button>
                     </Col>
-                    <Col span={8}>
+                    <Col span={6}>
                         <Button onClick={() => visibleToggle(widgetVisible)}>{widgetVisible ? '隐藏':'显示'}</Button>
+                    </Col>
+                    <Col span={6}>
+                        <Button onClick={saveHandle}>保存</Button>
                     </Col>
                 </Row>
             </div>

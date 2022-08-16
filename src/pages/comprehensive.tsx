@@ -36,6 +36,7 @@ import vtkPaintFilter from '@kitware/vtk.js/Filters/General/PaintFilter';
 import vtkColorTransferFunction from '@kitware/vtk.js/Rendering/Core/ColorTransferFunction';
 import vtkPiecewiseFunction from '@kitware/vtk.js/Common/DataModel/PiecewiseFunction';
 import { ViewTypes } from '@kitware/vtk.js/Widgets/Core/WidgetManager/Constants';
+import vtkAngleWidget from '@kitware/vtk.js/Widgets/Widgets3D/AngleWidget';
 
 import {Checkbox, Select, Slider, Button} from 'antd';
 import type { CheckboxChangeEvent } from 'antd/es/checkbox';
@@ -77,6 +78,7 @@ export default function Comprehensive() {
     const paintWidget = vtkPaintWidget.newInstance();
     // Paint filter
     const painter = vtkPaintFilter.newInstance();
+    const angleWidget = vtkAngleWidget.newInstance();
 
     const createRGBStringFromRGBValues = (rgb) => {
         if (rgb.length !== 3) {
@@ -263,7 +265,7 @@ export default function Comprehensive() {
               actor: axes,
               interactor: obj.renderWindow.getInteractor(),
             });
-            obj.orientationWidget.setEnabled(true);
+            // obj.orientationWidget.setEnabled(true);
             obj.orientationWidget.setViewportCorner(
               vtkOrientationMarkerWidget.Corners.BOTTOM_RIGHT
             );
@@ -322,6 +324,17 @@ export default function Comprehensive() {
                     const reslice = obj.reslice;
                     const viewType = xyzToViewType[i];
               
+                    // angle
+                    
+                    angleWidget.placeWidget(obj.resliceMapper.getBounds());
+                    obj.widgetManager.addWidget(angleWidget);
+
+                    obj.renderer.resetCamera();
+                    obj.widgetManager.enablePicking();
+                    setTimeout(() => {
+                        obj.widgetManager.grabFocus(angleWidget);
+                    }, 1000);
+                    // angle end
                     //No need to update plane nor refresh when interaction  is on current view. Plane can't be changed with interaction on current view. Refreshs happen automatically with `animation`.  Note: Need to refresh also the current view because of adding the mouse wheel to change slicer
                     viewAttributes.forEach((v) => {
                         // Interactions in other views may change current plane
@@ -467,19 +480,24 @@ export default function Comprehensive() {
     };
     const addPaintHandle = () => {
         viewAttributes.forEach(obj => {
-            let handle = obj.widgetManager.addWidget(paintWidget, ViewTypes.SLICE);
+            let paintHandle = obj.widgetManager.addWidget(paintWidget, ViewTypes.SLICE);
             obj.widgetManager.grabFocus(paintWidget);
-            handle.setVisibility(true);
-            handle.updateRepresentationForRender();
-            handle.onStartInteractionEvent(() => {
+            paintHandle.setVisibility(true);
+            paintHandle.updateRepresentationForRender();
+            paintHandle.onStartInteractionEvent(() => {
                 painter.startStroke();
                 painter.addPoint(paintWidget.getWidgetState().getTrueOrigin());
             });
-            handle.onInteractionEvent(() => {
+            paintHandle.onInteractionEvent(() => {
                 painter.addPoint(paintWidget.getWidgetState().getTrueOrigin());
             });
-            initializeHandle(handle);
+            initializeHandle(paintHandle);
         });
+    };
+    const addAngleWidgetHandle = () => {
+        viewAttributes.forEach(obj => {
+            obj.widgetManager.grabFocus(angleWidget);
+        })
     };
     useEffect(() => {
         renderContainer();
@@ -507,6 +525,7 @@ export default function Comprehensive() {
                 <Button onClick={buttonResetHandle} type="primary">Reset views</Button>
                 <Button onClick={addLineHandle}>addLine</Button>
                 <Button onClick={addPaintHandle}>addPaint</Button>
+                <Button onClick={addAngleWidgetHandle}>addangle</Button>
             </div>
         </div>
     );

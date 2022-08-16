@@ -48,7 +48,18 @@ export default function PaintWidget() {
     const [sliceMin, setSliceMin] = useState(1);
     const [sliceMax, setSliceMax] = useState(132);
     const fileContents = useRef({});
+    const [widgetVisible, setWidgetVisible] = useState(true);
 
+    const renderLabelData = () => {
+        // const center = [74.4009870392814, 284.10467299253185, 0];
+        // const point2 = [121.54116747218805, 251.60032328973563, 0]
+        // const corner = [57.26019001757384, 57.26019001757384, 57.26019001757384];
+
+        // scene.circleHandle.getWidgetState().getEllipseHandle().setOrigin(center);
+        // scene.circleHandle.getWidgetState().getPoint2Handle().setOrigin(point2);
+        // painter.paintEllipse(center, corner);
+        // initializeHandle(scene.circleHandle);
+    };
     const initializeHandle = (handle) => {
         handle.onStartInteractionEvent(() => {
             painter.startStroke();
@@ -268,7 +279,6 @@ export default function PaintWidget() {
             // Try to read it back.
             // const textEncoder = new TextEncoder();
             // writerReader.parseAsArrayBuffer(textEncoder.encode(fileContents.current));
-
             image.data = data;
             // set input data
             image.imageMapper.setInputData(data);
@@ -353,6 +363,7 @@ export default function PaintWidget() {
         } else {
             scope.widgetManager.disablePicking();
         }
+        renderLabelData();
     };
     const readyAll = () => {
         readyHandle(scene, true);
@@ -431,6 +442,14 @@ export default function PaintWidget() {
         //     color: '#ffee00',
         // }
     };
+    const visibleToggle = () => {
+        const allWidgets = scene.widgetManager.getWidgets();
+        allWidgets.forEach(widget => {
+            widget.setVisibility(!widgetVisible);
+        });
+        scene.renderWindow.render();
+        setWidgetVisible(!widgetVisible);
+    };
     useEffect(() => {
         renderScene();
         // loadImage();
@@ -462,6 +481,7 @@ export default function PaintWidget() {
                 <Button onClick={undoHandle}>Undo</Button>
                 <Button onClick={redoHandle}>Redo</Button>
                 <Button onClick={saveHandle}>Save</Button>
+                <Button onClick={() => visibleToggle(widgetVisible)}>{widgetVisible ? '隐藏':'显示'}</Button>
             </div>
             <div id="rootContainer"></div>
         </div>
